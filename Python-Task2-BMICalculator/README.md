@@ -16,9 +16,9 @@ A simple BMI Calculator and Tracker built with Python.
 * SQLite
 * Matplotlib
 ### How to Run
-* Install Python.
-* Install Matplotlib:
-* pip install matplotlib
+1. Install Python.
+2. Install Matplotlib:\
+   pip install matplotlib
 ### Run the program:
 * python "BMI Calculator.py"
 * BMI Categories
