@@ -26,8 +26,8 @@ A simple Python-based voice assistant that can listen to voice commands and perf
 * Webbrowser
 
 ### Installation
-* Install the required libraries:
- pip install SpeechRecognition pyttsx3 requests wikipedia\
+* Install the required libraries:\
+ pip install SpeechRecognition pyttsx3 requests wikipedia
 
 * For microphone support:
  pip install PyAudio
