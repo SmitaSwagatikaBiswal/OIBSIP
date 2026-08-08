@@ -19,9 +19,9 @@ A simple Python GUI application for generating secure random passwords with cust
 ### How to Run
 1.Install Python.\
 2.Install the required library:\
-pip install pyperclip\
+pip install pyperclip
 ### Run the program:
-python "Random Password Generator.py"\
+python "Random Password Generator.py"
 ### Project
 
 This project demonstrates Python GUI development, random password generation, clipboard functionality, and basic password strength evaluation.
