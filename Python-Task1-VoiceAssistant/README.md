@@ -29,7 +29,7 @@ A simple Python-based voice assistant that can listen to voice commands and perf
 * Install the required libraries:\
  pip install SpeechRecognition pyttsx3 requests wikipedia
 
-* For microphone support:
+* For microphone support:\
  pip install PyAudio
 
 ### How to Run
