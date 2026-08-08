@@ -1,4 +1,4 @@
-# ***BMI Tracker***
+# ***BMI Calculator***
 
 A simple BMI Calculator and Tracker built with Python.
 
@@ -20,7 +20,7 @@ A simple BMI Calculator and Tracker built with Python.
 * Install Matplotlib:
 * pip install matplotlib
 ### Run the program:
-* python "BMI Tracker.py"
+* python "BMI Calculator.py"
 * BMI Categories
 * BMI	Category
 * Below 18.5	Underweight
@@ -28,9 +28,9 @@ A simple BMI Calculator and Tracker built with Python.
 * 25 – 29.9	Overweight
 * 30 or above	Obese
 * Project Structure
-BMI Tracker/
-│
-├── BMI Tracker.py
-└── bmi_tracker.db
+BMI Calculator/\
+│\
+├── BMI Calculator.py\
+└── bmi_tracker.db\
 
-The database file is created automatically when the application is run./
+The database file is created automatically when the application is run.\
