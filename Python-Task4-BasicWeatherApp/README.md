@@ -19,13 +19,12 @@ A simple desktop weather application built with Python and Tkinter. It uses the 
 * Pillow
 ### Installation
 
-1. Install the required libraries:\
+1. Install the required libraries:
+   pip install requests pillow
 
-pip install requests pillow
+3. Add your OpenWeatherMap API key to the API_KEY variable in the Python file.
 
-2. Add your OpenWeatherMap API key to the API_KEY variable in the Python file.
-
-### Run\
+### Run
 python "Weather App.py"
 ### Project
 
