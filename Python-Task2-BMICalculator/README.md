@@ -28,7 +28,7 @@ A simple BMI Calculator and Tracker built with Python.
 * 25 – 29.9	Overweight
 * 30 or above	Obese
 * Project Structure
-BMI Calculator
+BMI Calculator\
 ├── BMI Calculator.py\
 └── bmi_tracker.db
 
