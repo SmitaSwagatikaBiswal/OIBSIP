@@ -7,7 +7,7 @@ A simple Python-based voice assistant that can listen to voice commands and perf
 * Text-to-speech using pyttsx3
 * Current time
 * Weather information using OpenWeatherMap
-*General knowledge answers using Wikipedia
+* General knowledge answers using Wikipedia
 * Send emails using Gmail SMTP
 * Set time-based reminders
 * Add custom website commands
