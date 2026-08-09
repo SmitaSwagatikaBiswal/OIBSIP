@@ -1,5 +1,5 @@
-import speech_recognition as sp
-import pyttsx3 as pt
+import speech_recognition as sr
+import pyttsx3
 import datetime
 import webbrowser
 import time
@@ -11,40 +11,54 @@ import wikipedia
 import urllib.parse
 import json
 import os
+from email.message import EmailMessage
 
 API_KEY = "07db125602deea9fb4784e31bc427581"
 CITY = "Bhubaneswar"
 MY_EMAIL = "mimilimiomio@gmail.com"
 MY_PASSWORD = "woct dsgi mnpl jbdq"
 
-engine = pt.init()
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[1].id)
-engine.setProperty('rate', 170)
+engine = pyttsx3.init()
+engine.setProperty("rate",170)
+engine.setProperty("volume",1)
+voices = engine.getProperty("voices")
 
+if len(voices)>1:
+    engine.setProperty("voice",voices[1].id)
 def speak(text):
-    print(f"Assistant: {text}")
-    try:
-        time.sleep(1)
-        engine.say(text)
-        engine.runAndWait()
-    except RuntimeError:
-        pass
+    print("Assistant :",text)
+    engine.say(text)
+    engine.runAndWait()
 
+recognizer = sr.Recognizer()
 def listen():
-    rec = sp.Recognizer()
-    with sp.Microphone() as source:
-        print("Speak now. I am Listening...")
-        rec.adjust_for_ambient_noise(source, duration=0.5)
+    with sr.Microphone() as source:
+        recognizer.pause_threshold=1
+        recognizer.energy_threshold=300
+        recognizer.dynamic_energy_threshold=True
+        recognizer.adjust_for_ambient_noise(source,1)
+        print("\nListening...")
         try:
-            audio = rec.listen(source, timeout=30, phrase_time_limit=5)
-        except sp.WaitTimeoutError:
-            return "none"
-    try:
-        query = rec.recognize_google(audio, language='en-in')
-        return query.lower()
-    except:
-        return "none"
+            audio=recognizer.listen(source,timeout=10,phrase_time_limit=12)
+            print("Recognizing...")
+            command = recognizer.recognize_google(audio)
+            print("You :",command)
+            return command.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't understand.")
+            return ""
+        except sr.WaitTimeoutError:
+            speak("I didn't hear anything.")
+            return ""
+        except Exception as e:
+            print(e)
+            speak("Something went wrong.")
+            return ""
+
+def tell_time():
+    current = datetime.datetime.now().strftime("%I:%M %p")
+    speak(f"The current time is {current}")
+    
 def answer_question(query):
     try:
         answer = wikipedia.summary(query, sentences=2)
@@ -53,6 +67,11 @@ def answer_question(query):
         webbrowser.open("https://www.google.com/search?q=" +urllib.parse.quote(query))
         return "I could not find an exact answer, so I opened Google."
 
+def google_search(query):
+    url = "https://www.google.com/search?q=" + urllib.parse.quote(query)
+    speak("Searching Google for " + query)
+    webbrowser.open(url)
+    
 def get_weather():
     url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
     try:
@@ -68,19 +87,54 @@ def get_weather():
         print(e)
         return "Unable to connect to the weather service."
 
-def send_email(to, subject, content, sender_name):
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(MY_EMAIL, MY_PASSWORD)
-    server.sendmail(MY_EMAIL, to, f"Subject: {subject}\n\n{content}\n\nRegards, {sender_name}")
-    server.close()
+def send_email():
+    contacts = {
+        "mimili": "mimilimiomio@gmail.com",
+        "me": MY_EMAIL,
+        "smita": "smitaswagatikab@gmail.com"}
+    speak("Who should I send the email to?")
+    recipient = listen().strip().lower()
+    if recipient in contacts:
+        email_address = contacts[recipient]
+    elif "@" in recipient:
+        email_address = recipient
+    else:
+        speak("Sorry, I don't know that contact.")
+        return
+    speak("What is the subject of the email?")
+    subject = listen()
+    if not subject:
+        speak("I could not understand the subject.")
+        return
+    speak("What should I write in the email?")
+    message = listen()
+    if not message:
+        speak("I could not understand the message.")
+        return
+    try:
+        email = EmailMessage()
+        email["From"] = MY_EMAIL
+        email["To"] = email_address
+        email["Subject"] = subject
+        email.set_content(message)
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(MY_EMAIL, MY_PASSWORD)
+        server.send_message(email)
+        server.quit()
+        speak("Email sent successfully.")
+    except Exception as error:
+        print("Email error:", error)
+        speak("Sorry, I could not send the email.")
 
 def set_reminder(seconds, message):
-    def reminder_thread():
-        time.sleep(seconds)
-        speak(f"Reminder: {message}")
+    def notify():
+        speak("Reminder: " + message)
         winsound.Beep(1000, 2000)
-    threading.Thread(target=reminder_thread).start()
+
+    timer = threading.Timer(seconds, notify)
+    timer.daemon = True
+    timer.start()
 
 if os.path.exists("commands.json"):
     with open("commands.json","r") as file:
@@ -108,75 +162,59 @@ def add_custom_command():
     speak("Command saved successfully.")
 
 def main():
-    global current_voice_index
-    global current_rate
     speak("Hello! I am your personal assistant.")
-    speak("You can ask me about the time\n weather\n general knowledge\n set reminders\n  even send emails\n or even add custom command")
-    
-    while True:
+    speak("I can tell you the time and weather, answer questions, send emails, "
+          "set reminders, search Google, and open custom commands.")
+    active = True
+    while active:
         query = listen()
-        if query == "none": continue
-
-        if 'time' in query:
-            speak(f"The time is {datetime.datetime.now().strftime('%I:%M %p')}")
-        
-        elif 'weather' in query:
-            print(get_weather())
-            
-        elif 'what is' in query or 'who is' in query or 'calculate' in query:
-            speak("Searching....")
-            speak(answer_question(query))
-        
-        elif 'send email' in query or 'email' in query or 'draft an email' in query or 'write an email' in query or 'send an email to' in query:
-            try:
-                speak("What is the subject of the email?")
-                subject = listen()
-                speak("What is the body of the email? (Please give a detailed message)")
-                content = listen()
-                speak("Whom should I send this email to?")
-                recipient = listen()
-                contacts = {
-                    'mimili': 'mimilimiomio@gmail.com',
-                    'me': MY_EMAIL,
-                    'smita': 'smitaswagatikab@gmail.com'
-                }
-
-                Tmail = None
-                if recipient and '@' in recipient:
-                    Tmail = recipient
-                else:
-                    key = recipient.replace("@", "").strip().lower()
-                    Tmail = contacts.get(key)
-
-                if not Tmail:
-                    speak("I don't have an email address for that recipient.")
-                else:
-                    send_email(Tmail, subject, content, "Assistant")
-                speak("Email has been sent successfully.")
-            except Exception as e:
-                speak("I am sorry, I was unable to send the email.")
-
-        elif "add command" in query:
-            add_custom_command()
-
-        elif 'reminder' in query:
-            speak("What should I remind you about?")
-            msg = listen()
-            speak("After how much time in minutes?")
-            mins = listen()
-            try:
-                val = int(''.join(filter(str.isdigit, mins)))
-                set_reminder(val * 60, msg)
-                speak(f"Reminder set for {val} minutes.")
-            except: speak("Invalid time format.")
-
-        elif 'exit' in query or 'stop' in query or 'quit' in query or 'bye' in query:
+        if not query:
+            continue
+        exit_words = ["exit", "stop", "quit", "bye"]
+        if any(word in query for word in exit_words):
             speak("Okay, Bye! See you next time.")
-            break
-        else:
-            speak("Please wait while I search the web.")
-            webbrowser.open(f"https://www.google.com/search?q={query}")
-
+            active = False
+            continue
+        if execute_custom_command(query):
+            continue
+        if "time" in query:
+            tell_time()
+            continue
+        if "weather" in query:
+            speak(get_weather())
+            continue
+        if "email" in query:
+            send_email()
+            continue
+        if "add command" in query:
+            add_custom_command()
+            continue
+        if "reminder" in query:
+            speak("What should I remind you about?")
+            reminder_message = listen()
+            if not reminder_message:
+                speak("I could not understand the reminder.")
+                continue
+            speak("After how many minutes should I remind you?")
+            reminder_time = listen()
+            try:
+                minutes = int(''.join(filter(str.isdigit, reminder_time)))
+                if minutes <= 0:
+                    speak("Please provide a positive number of minutes.")
+                    continue
+                set_reminder(minutes * 60, reminder_message)
+                speak(f"Your reminder has been set for {minutes} minutes.")
+            except (ValueError, TypeError):
+                speak("Sorry, I could not understand the time.")
+            continue
+        question_words = ["what is", "who is", "calculate"]
+        if any(word in query for word in question_words):
+            speak("Searching for an answer.")
+            answer = answer_question(query)
+            speak(answer)
+            continue
+        google_search(query)
+    speak("Assistant closed.")
 if __name__ == "__main__":
     main()
 
